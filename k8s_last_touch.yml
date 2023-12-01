@@ -1,0 +1,12 @@
+- name: config file, networking, rbac, dns
+  become: yes
+  hosts: k8s-master1
+  roles:
+    - role: k8s_config_files_2
+      kubeconfig_temp_dir: "{{ kubeconfig.temp_dir }}"
+      cluster: "{{ cluster_name }}"
+      kubeconfig_admin_2: "{{ kubeconfig.admin_2 }}"
+    - role: k8s_install_networking
+    - role: k8s_rbac
+      kube_lib_dir: "{{ kube.lib_dir }}"
+    - role: k8s_dns_addons

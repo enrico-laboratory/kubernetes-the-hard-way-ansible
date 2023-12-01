@@ -1,0 +1,3 @@
+- name: add entry
+  include_tasks: add_entry.yml
+  loop: "{{ sysctl_entry }}"

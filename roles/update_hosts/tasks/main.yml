@@ -1,0 +1,24 @@
+- name: update packages and install epel release (RedHat)
+  block:
+    - name: update repository index
+      yum:
+        update_cache: yes
+      changed_when: false
+
+    - name: Upgrade all packages
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: install epel release
+      dnf:
+        name: epel-release
+
+  when: ansible_distribution_file_variety == "RedHat"
+
+
+- name: update repository index and upgrade packages (Debian)
+  apt:
+    update_cache: yes
+    upgrade: dist
+  when: ansible_distribution_file_variety == "Debian"

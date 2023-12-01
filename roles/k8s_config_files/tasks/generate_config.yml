@@ -1,0 +1,50 @@
+- name: set cluster
+  shell:
+    chdir: "{{ kubeconfig_temp_dir }}"
+    cmd: |
+      kubectl config set-cluster {{ cluster }} \
+          --certificate-authority={{ item.cert_dir }}/ca.crt \
+          --embed-certs={{ item.embed_certs }} \
+          --server=https://{{ item.server_address }}:{{ item.port }} \
+          --kubeconfig={{ item.service }}.kubeconfig
+  register: output
+
+- debug:
+    msg: "{{ output.stdout_lines }}"
+
+- name: set credentials
+  shell:
+    chdir: "{{ kubeconfig_temp_dir }}"
+    cmd: |
+      kubectl config set-credentials {{ item.cn }} \
+          --client-certificate={{ item.cert_dir }}/{{ item.service }}.crt \
+          --embed-certs={{ item.embed_certs }} \
+          --client-key={{ item.cert_dir }}/{{ item.service }}.key \
+          --kubeconfig={{ item.service }}.kubeconfig
+  register: output
+
+- debug:
+    msg: "{{ output.stdout_lines }}"
+
+- name: set context
+  shell:
+    chdir: "{{ kubeconfig_temp_dir }}"
+    cmd: |
+      kubectl config set-context default \
+          --cluster={{ cluster }} \
+          --user={{ item.cn }} \
+          --kubeconfig={{ item.service }}.kubeconfig
+  register: output
+
+- debug:
+    msg: "{{ output.stdout_lines }}"
+
+- name: use context
+  shell:
+    chdir: "{{ kubeconfig_temp_dir }}"
+    cmd: |
+      kubectl config use-context default --kubeconfig={{ item.service }}.kubeconfig
+  register: output
+
+- debug:
+    msg: "{{ output.stdout_lines }}"

@@ -1,0 +1,56 @@
+- name: Sync certs
+  become: yes
+  hosts: k8s-master
+  vars:
+    certificates_temp_dir: "{{ certificates.temp_dir }}"
+    k8s_master1_hostname: "{{ k8s_master1.hostname }}"
+    etcd_etc_dir: "{{ etcd.etc_dir }}"
+    etcd_data_dir: "{{ etcd.data_dir }}"
+    etcd_cert_key_filename:
+      - '{{ etcd.cert_filename_root }}.key'
+      - '{{ etcd.cert_filename_root }}.crt'
+
+  tasks:
+
+  - name: create etcd lib directory
+    file:
+      name: "{{ item.name }}"
+      state: directory
+      mode: "{{ item.mode }}"
+      owner: "root"
+    loop:
+      - { "name": "{{ etcd_data_dir }}", "mode": "0700" }
+      - { "name": "{{ etcd_etc_dir }}", "mode": "0755" }
+
+  - name: Sync etcd cert and key
+    include_role:
+      name: sync_files
+    vars:
+      sync_files: {
+        "filename": "{{ outer_item }}",
+        "source_path": "{{ certificates_temp_dir }}",
+        "dest_path": "{{ etcd_etc_dir }}",
+        "mode": 600,
+        "owner": "root",
+        src_hostname: "{{ k8s_master1.hostname }}"
+      }
+      dest_hosts: "{{ groups['k8s-master']}}"
+    loop: "{{ etcd_cert_key_filename }}"
+    loop_control:
+      loop_var: outer_item
+
+
+- name: Install etcd
+  become: yes
+  hosts: k8s-master
+  roles:
+    - role: k8s_install_etcd
+      service: "{{ etcd.name }}"
+      etcd_data_dir: "{{ etcd.data_dir }}"
+      etcd_etc_dir: "{{ etcd.etc_dir }}"
+      etcd_bin_dir: "{{ bin_dir }}"
+      etcd_ver: "{{ etcd.version }}"
+      etcd_cert_key_filename: "{{ etcd.cert_filename_root }}"
+      cert_key_host_source: "{{ k8s_master1.hostname }}"
+      kube_pki_dir: "{{ kube.pki_dir }}"
+      ca_crt: "{{ certificates.ca.name }}"

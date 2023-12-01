@@ -1,0 +1,132 @@
+- name: Copy files
+  become: yes
+  hosts: k8s
+  vars:
+    main_folder: "/home/{{ kube.user }}"
+    k8s_master1_hostname: "{{ k8s_master1.hostname }}"
+    k8s_worker1_hostname: "{{ k8s_worker1.hostname }}"
+    k8s_worker2_hostname: "{{ k8s_worker2.hostname }}"
+    certs_temp_dir: "{{ certificates.temp_dir }}"
+    kube_pki_dir: "{{ kube.pki_dir }}"
+    kubeconfig_temp_dir: "{{ kubeconfig.temp_dir }}"
+    kube_lib_dir: "{{ kube.lib_dir }}"
+    kube_proxy_config_folder: "{{ kube.services.kube_proxy.config_folder }}"
+    kube_encryption_config_file: "{{ kube.encryption_config_file }}"
+    kubeconfig_master_list:
+      - "{{ kubeconfig.kube_controller_manager }}"
+      - "{{ kubeconfig.kube_scheduler }}"
+      - "{{ kubeconfig.admin }}"
+    kubeconfig_worker_list:
+      - "{{ kubeconfig.kube_proxy }}"
+    kubeconfig_worker1_list:
+      - "{{ kubeconfig.worker1 }}"
+    cert_key_list:
+      - "{{ certificates.ca.name }}.crt"
+      - "{{ certificates.ca.name }}.key"
+      - "{{ certificates.kube_apiserver.name }}.crt"
+      - "{{ certificates.kube_apiserver.name }}.key"
+      - "{{ certificates.service_account.name }}.crt"
+      - "{{ certificates.service_account.name }}.key"
+      - "{{ certificates.apiserver_kubelet_client.name }}.crt"
+      - "{{ certificates.apiserver_kubelet_client.name }}.key"
+      - "{{ certificates.etcd_server.name }}.crt"
+      - "{{ certificates.etcd_server.name }}.key"
+      - "{{ certificates.kube_scheduler.name }}.crt"
+      - "{{ certificates.kube_scheduler.name }}.key"
+      - "{{ certificates.kube_controller_manager.name }}.crt"
+      - "{{ certificates.kube_controller_manager.name }}.key"
+    cert_key_worker1_list:
+      - "{{ certificates.worker1.name }}.crt"
+      - "{{ certificates.worker1.name }}.key"
+      - "{{ certificates.ca.name }}.crt"
+      - "{{ certificates.kube_proxy.name }}.crt"
+      - "{{ certificates.kube_proxy.name }}.key"
+    cert_key_worker2_list:
+      - "{{ certificates.ca.name }}.crt"
+      - "{{ certificates.kube_proxy.name }}.crt"
+      - "{{ certificates.kube_proxy.name }}.key"
+  tasks:
+
+    - name: Sync files encryption-config.yaml
+      include_role:
+        name: sync_files
+      vars:
+        sync_files: {
+          "filename": "{{ kube_encryption_config_file }}",
+          "source_path": "{{ kubeconfig_temp_dir }}",
+          "dest_path": "{{ kube_lib_dir }}",
+          "mode": 0644,
+          "owner": "root",
+          src_hostname: "{{ k8s_master1_hostname }}"
+        }
+        dest_hosts: "{{ groups['k8s-master']}}"
+
+    - name: Sync kubeconfig to masters
+      include_role:
+        name: sync_files
+      vars:
+        sync_files: {
+          "filename": "{{ outer_item.service }}.kubeconfig",
+          "source_path":  "{{ kubeconfig_temp_dir }}/",
+          "dest_path": '{{ kube_lib_dir }}',
+          "mode": 600,
+          "owner": "root",
+          src_hostname: "{{ k8s_master1_hostname }}"
+        }
+        dest_hosts: "{{ groups['k8s-master']}}"
+      loop: "{{ kubeconfig_master_list }}"
+      loop_control:
+        loop_var: outer_item
+
+    - name: Sync kubeconfig to workers
+      include_role:
+        name: sync_files
+      vars:
+        sync_files: {
+          "filename": "{{ outer_item.service }}.kubeconfig",
+          "source_path":  "{{ kubeconfig_temp_dir }}/",
+          "dest_path": '{{ kube_proxy_config_folder }}',
+          "mode": 600,
+          "owner": "root",
+          src_hostname: "{{ k8s_master1_hostname }}"
+        }
+        dest_hosts: "{{ groups['k8s-worker']}}"
+      loop: "{{ kubeconfig_worker_list }}"
+      loop_control:
+        loop_var: outer_item
+
+    - name: Sync kubeconfig to worker1
+      include_role:
+        name: sync_files
+      vars:
+        sync_files: {
+          "filename": "{{ outer_item.service }}.kubeconfig",
+          "source_path": "{{ kubeconfig_temp_dir }}/",
+          "dest_path": '{{ kube_lib_dir }}',
+          "mode": 600,
+          "owner": "root",
+          src_hostname: "{{ k8s_master1_hostname }}"
+        }
+        dest_hosts:
+        - "{{ k8s_worker1_hostname }}"
+      loop: "{{ kubeconfig_worker1_list }}"
+      loop_control:
+        loop_var: outer_item
+
+    - name: Sync cert worker 2
+      include_role:
+        name: sync_files
+      vars:
+        sync_files: {
+          "filename": "{{ outer_item }}",
+          "source_path": "{{ certs_temp_dir }}/",
+          "dest_path": '{{ kube_pki_dir }}',
+          "mode": 600,
+          "owner": "root",
+          src_hostname: "{{ k8s_master1_hostname }}"
+        }
+        dest_hosts:
+          - "{{ k8s_worker2_hostname }}"
+      loop: "{{ cert_key_worker2_list }}"
+      loop_control:
+        loop_var: outer_item

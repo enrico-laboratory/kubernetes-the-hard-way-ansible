@@ -1,0 +1,9 @@
+- name: link ca cert
+  include_tasks: link_certs.yml
+
+- name: get etcd
+  include_tasks: get_etcd.yml
+
+- name: etcd service
+  include_tasks: service.yml
+

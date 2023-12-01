@@ -1,0 +1,34 @@
+- name: Install control plane
+  become: yes
+  hosts: k8s-master
+  roles:
+  - role: k8s_install_control_plane
+    apiserver_client_crt: "{{ certificates.apiserver_kubelet_client.name }}.crt"
+    apiserver_client_key: "{{ certificates.apiserver_kubelet_client.name }}.key"
+    arch_uri: "{{ kube.release_arch }}"
+    base_uri: "{{ kube.release_base_url }}"
+    ca_crt: "{{ certificates.ca.name }}.crt"
+    ca_key: "{{ certificates.ca.name }}.key"
+    encryption_config_file: "{{ kube.encryption_config_file }}"
+    etcd_cert: "{{ certificates.etcd_server.name }}.crt"
+    etcd_key: "{{ certificates.etcd_server.name }}.key"
+    k8s_master1_hostname: "{{ k8s_master1.hostname }}"
+    k8s_master2_hostname: "{{ k8s_master2.hostname }}"
+    k8s_lb_ip: "{{ k8s_lb.ip }}"
+    kube_apiserver: "{{ kube.services.kube_apiserver.name }}"
+    kube_controller_manager: "{{ kube.services.kube_controller_manager.name }}"
+    kube_scheduler: "{{ kube.services.kube_scheduler.name }}"
+    kube_version: "{{ kube.version }}"
+    kube_pki_dir: "{{ kube.pki_dir }}"
+    kube_lib_dir: "{{ kube.lib_dir }}"
+    kube_bin_dir: "{{ bin_dir }}"
+    pod_cidr: "{{ kube.pod_cidr }}"
+    services:
+      - "{{ kube.services.kube_apiserver.name }}"
+      - "{{ kube.services.kube_controller_manager.name }}"
+      - "{{ kube.services.kube_scheduler.name }}"
+      - "{{ kube.services.kubectl.name }}"
+    service_account_crt: "{{ certificates.service_account.name }}.crt"
+    service_account_key: "{{ certificates.service_account.name }}.key"
+    service_cidr: "{{ kube.service_cidr }}"
+    systemd_unit_dir: "{{ systemd_unit_directory }}"

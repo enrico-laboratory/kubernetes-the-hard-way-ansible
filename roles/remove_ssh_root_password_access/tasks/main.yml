@@ -1,0 +1,8 @@
+- name: remove root password access
+  lineinfile:
+    path: "/etc/ssh/sshd_config"
+    regexp: '^#PermitRootLogin prohibit-password$'
+    line: 'PermitRootLogin prohibit-password'
+    backrefs: yes
+  notify:
+    restart sshd

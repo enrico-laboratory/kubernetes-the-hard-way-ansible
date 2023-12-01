@@ -1,0 +1,48 @@
+- name: Download services
+  get_url:
+    url: "{{ base_uri }}/{{ kube_version }}/{{ arch_uri }}/{{ item }}"
+    dest: "/usr/local/bin"
+    mode: 700
+  with_items: "{{ services }}"
+
+- name: copy {{ kube_apiserver }} service
+  template:
+    dest: "{{ systemd_unit_dir }}/{{ kube_apiserver }}.service"
+    src: "{{ kube_apiserver }}.service"
+    mode: 0644
+    owner: root
+  notify: restart kube_apiserver service
+
+- name: start {{ kube_apiserver }} service
+  systemd:
+    name: "{{ kube_apiserver }}"
+    state: started
+    enabled: yes
+
+- name: copy {{ kube_controller_manager }} service
+  template:
+    dest: "{{ systemd_unit_dir }}/{{ kube_controller_manager }}.service"
+    src: "{{ kube_controller_manager }}.service"
+    mode: 0644
+    owner: root
+  notify: restart kube_controller_manager service
+
+- name: start {{ kube_controller_manager }} service
+  systemd:
+    name: "{{ kube_controller_manager }}"
+    state: started
+    enabled: yes
+
+- name: copy {{ kube_scheduler }} service
+  template:
+    dest: "{{ systemd_unit_dir }}/{{ kube_scheduler }}.service"
+    src: "{{ kube_scheduler }}.service"
+    mode: 0644
+    owner: root
+  notify: restart kube_scheduler service
+
+- name: start {{ kube_scheduler }} service
+  systemd:
+    name: "{{ kube_scheduler }}"
+    state: started
+    enabled: yes

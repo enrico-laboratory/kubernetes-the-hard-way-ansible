@@ -1,0 +1,17 @@
+- name: install haproxy
+  apt:
+    name: haproxy
+    state: latest
+    update_cache: yes
+
+- name: copy config file
+  template:
+    src: "{{ config_filename }}"
+    dest: "{{ config_file_path }}/{{ config_filename }}"
+  notify: restart haproxy
+
+- name: haproxy service
+  systemd:
+    name: haproxy
+    state: started
+    enabled: yes

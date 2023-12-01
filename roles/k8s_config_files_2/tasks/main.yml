@@ -1,0 +1,4 @@
+- name: config
+  include_tasks: config.yml
+  loop:
+    - "{{ kubeconfig_admin_2 }}"

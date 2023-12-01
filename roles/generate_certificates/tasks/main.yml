@@ -1,0 +1,19 @@
+- name: create temp cert directory
+  file:
+    path: "{{ certs_temp_dir }}"
+    state: directory
+    owner: root
+    group: root
+
+- name: Generate Certificates
+  include_tasks: generate_certs.yaml
+  loop: "{{ certificate_list }}"
+
+- name: Get information on generated certificate
+  community.crypto.x509_certificate_info:
+    path: "{{ certs_temp_dir }}/ca.crt"
+  register: result
+
+- name: Dump information
+  ansible.builtin.debug:
+    var: result

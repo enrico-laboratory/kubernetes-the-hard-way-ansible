@@ -1,0 +1,52 @@
+- name: adding kubernetes repository
+  block:
+    - name: create volumes directories
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        owner: root
+        group: root
+
+    - name: create keyring file
+      ansible.builtin.copy:
+        content: ""
+        dest: "/etc/apt/keyrings/{{ kubernetes_apt_repo_keyring }}.gpg"
+        force: false
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Add an Apt signing key
+      ansible.builtin.apt_key:
+        url: "https://pkgs.k8s.io/core:/stable:/{{ kube_version_apt_repo }}/deb/Release.key"
+        keyring: "/etc/apt/keyrings/{{ kubernetes_apt_repo_keyring }}.gpg"
+        state: present
+
+    - name: add repository
+      ansible.builtin.apt_repository:
+        repo:  "deb [signed-by=/etc/apt/keyrings/{{ kubernetes_apt_repo_keyring }}.gpg] https://pkgs.k8s.io/core:/stable:/{{ kube_version_apt_repo }}/deb/ /"
+        state: present
+  when: ansible_distribution_file_variety == "Debian"
+
+- name: install packages
+  apt:
+    name:
+      - containerd
+      - kubernetes-cni
+      - kubectl
+      - ipvsadm
+      - ipset
+    state: latest
+    update_cache: yes
+
+- name: make containerd config dir
+  file:
+    path: "{{ containerd_config_dir }}"
+    state: directory
+
+- name: copy containerd config file
+  copy:
+    src: config.toml
+    dest: "{{ containerd_config_dir }}/config.toml"
+    mode: 644
+  notify: restart containerd

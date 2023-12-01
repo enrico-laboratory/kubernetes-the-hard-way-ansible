@@ -1,0 +1,7 @@
+- name: generate encryption file
+  template:
+    src: "{{ kube_encryption_config_file }}"
+    dest: "{{ kube_lib_dir }}/{{ kube_encryption_config_file }}"
+    mode: 0644
+    owner: root
+  when: inventory_hostname in {{ master_list }}

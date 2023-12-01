@@ -1,0 +1,55 @@
+- name: bootstrap worker 1 preparation
+  become: yes
+  hosts: k8s
+  vars:
+    certs_temp_dir: "{{ certificates.temp_dir }}"
+    kubelet_dir: "{{kube.services.kubelet.config_folder }}"
+    cert_key_worker1_list:
+      - "{{ certificates.worker1.name }}.crt"
+      - "{{ certificates.worker1.name }}.key"
+    k8s_worker1_hostname: "{{ k8s_worker1.hostname }}"
+    k8s_master1_hostname: "{{ k8s_master1.hostname }}"
+
+  tasks:
+  - name: Sync cert worker 1
+    include_role:
+      name: sync_files
+    vars:
+      sync_files: {
+        "filename": "{{ outer_item }}",
+        "source_path": "{{ certs_temp_dir }}/",
+        "dest_path": '{{ kubelet_dir }}',
+        "mode": 600,
+        "owner": "root",
+        src_hostname: "{{ k8s_master1_hostname }}"
+      }
+      dest_hosts:
+        - "{{ k8s_worker1_hostname }}"
+    loop: "{{ cert_key_worker1_list }}"
+    loop_control:
+      loop_var: outer_item
+
+- name: bootstrap worker 1
+  become: yes
+  hosts: k8s-worker1
+  roles:
+    - role: k8s_install_worker_bin
+      k8s_worker1_hostname: "{{ k8s_worker1.hostname }}"
+      bin_directory: "{{ bin_dir }}"
+      kube_version: "{{ kube.version }}"
+      kube_pki_dir: "{{ kube.pki_dir }}"
+      kube_lib_dir: "{{ kube.lib_dir }}"
+      ca_cert: "{{ certificates.ca.name }}"
+      kube_cluster_dns: "{{ kube.cluster_dns }}"
+      kube_pod_cidr: "{{ kube.pod_cidr }}"
+      worker1_cert: "{{ certificates.worker1.name }}"
+      kubelet_dir: "{{kube.services.kubelet.config_folder }}"
+      kube_proxy_dir: "{{ kube.services.kube_proxy.config_folder }}"
+      kubelet_config_file: "{{ kube.services.kubelet.config_file }}"
+      kubelet_name: "{{ kube.services.kubelet.name }}"
+      kube_proxy_name: "{{ kube.services.kube_proxy.name }}"
+      kube_proxy_config_file: "{{ kube.services.kube_proxy.config_file }}"
+      systemd_unit_dir: "{{ systemd_unit_directory }}"
+      kubectl_name: "{{ kube.services.kubectl.name }}"
+      kubelet_service: "{{ kube.services.kubelet }}"
+      kube_proxy_service: "{{ kube.services.kube_proxy }}"

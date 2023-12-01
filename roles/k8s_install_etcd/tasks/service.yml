@@ -1,0 +1,14 @@
+- name: copy service file
+  template:
+    src: "etcd.service"
+    dest: "/etc/systemd/system/"
+    owner: root
+    mode: 0644
+  notify:
+    restart etcd
+
+- name: start service
+  service:
+    name: etcd
+    enabled: yes
+    state: started

@@ -1,0 +1,56 @@
+- name: create directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ kubelet_dir }}/pki"
+    - "{{ kube_proxy_dir }}"
+
+- name: download binaries
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kube_version }}/bin/linux/amd64/{{ item }}"
+    dest: "{{ bin_directory }}"
+    mode: 0744
+  loop:
+    - "{{ kube_proxy_name }}"
+    - "{{ kubelet_name }}"
+    - "{{ kubectl_name }}"
+
+- name: create bootstrap-kubeconfig
+  template:
+    src: "bootstrap-kubeconfig"
+    dest: "{{ kubelet_dir }}"
+
+- name: create kubelet-config
+  template:
+    src: "kubelet-config.yaml"
+    dest: "{{ kubelet_dir }}"
+
+- name: create kubelet service
+  template:
+    src: "kubelet.service"
+    dest: "{{ systemd_unit_dir }}"
+
+- name: start kubelet service
+  systemd:
+    name: kubelet
+    state: started
+    enabled: yes
+  notify: restart kubelet
+
+- name: create kube-proxy-config
+  template:
+    src: "kube-proxy-config.yaml"
+    dest: "{{ kube_proxy_dir }}"
+
+- name: create kube-proxy service
+  template:
+    src: "kube-proxy.service"
+    dest: "{{ systemd_unit_dir }}"
+
+- name: start kube-proxy service
+  systemd:
+    name: kube-proxy
+    state: started
+    enabled: yes
+  notify: restart kube-proxy

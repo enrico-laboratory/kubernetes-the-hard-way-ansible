@@ -1,0 +1,55 @@
+- name: generate expiration date
+  shell:
+    cmd: date -u --date "+7 days" +"%Y-%m-%dT%H:%M:%SZ"
+  register: expiration_date
+
+- debug:
+    msg: "{{ expiration_date.stdout }}"
+
+- name: create token config
+  template:
+    src: "{{ kube_bootstrap_token_name }}.yaml"
+    dest: "/root"
+
+- name: create token
+  shell:
+    chdir: "/root"
+    cmd: |
+      kubectl create -f {{ kube_bootstrap_token_name }}.yaml --kubeconfig {{ kube_lib_dir }}/{{ kubeconfig_admin_service }}.kubeconfig
+  ignore_errors: yes
+
+#- name: create token
+#  kubernetes.core.k8s:
+#    state: present
+#    src: "{{ lookup('template', kube_bootstrap_token_name + '.yaml') }}"
+
+- name: create cluster role
+  shell:
+    chdir: "/root"
+    cmd: |
+      kubectl create clusterrolebinding create-csrs-for-bootstrapping \
+      --clusterrole=system:node-bootstrapper \
+      --group=system:bootstrappers \
+      --kubeconfig {{ kube_lib_dir }}/{{ kubeconfig_admin_service }}.kubeconfig
+  register: cluster_role_out
+  ignore_errors: yes
+
+- name: Authorize workers(kubelets) to approve CSRs
+  shell:
+    chdir: "/root"
+    cmd: |
+      kubectl create clusterrolebinding auto-approve-csrs-for-group \
+        --clusterrole=system:certificates.k8s.io:certificatesigningrequests:nodeclient \
+        --group=system:bootstrappers \
+        --kubeconfig {{ kube_lib_dir }}/{{ kubeconfig_admin_service }}.kubeconfig
+  ignore_errors: yes
+
+- name: Authorize workers(kubelets) to Auto Renew Certificates on expiration
+  shell:
+    chdir: "/root"
+    cmd: |
+      kubectl create clusterrolebinding auto-approve-renewals-for-nodes \
+        --clusterrole=system:certificates.k8s.io:certificatesigningrequests:selfnodeclient \
+        --group=system:nodes \
+        --kubeconfig {{ kube_lib_dir }}/{{ kubeconfig_admin_service }}.kubeconfig
+  ignore_errors: yes

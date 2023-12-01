@@ -1,0 +1,18 @@
+k8s:
+  hosts:
+    k8s-lb:
+  children:
+    k8s-master:
+    k8s-worker:
+    k8s-admin:
+
+k8s-master:
+  hosts:
+    k8s-master[1:2]:
+k8s-worker:
+  hosts:
+    k8s-worker[1:2]:
+
+k8s-admin:
+  hosts:
+    k8s-master1:

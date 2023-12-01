@@ -1,0 +1,14 @@
+[Unit]
+Description=Kubernetes Scheduler
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+ExecStart={{ kube_bin_dir }}/{{ kube_scheduler }} \
+  --kubeconfig={{ kube_lib_dir }}/{{ kube_scheduler }}.kubeconfig \
+  --leader-elect=true \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

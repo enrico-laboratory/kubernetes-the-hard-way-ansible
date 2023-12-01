@@ -1,0 +1,20 @@
+- name: get etcd
+  ansible.builtin.unarchive:
+    src: "https://github.com/etcd-io/etcd/releases/download/{{ etcd_ver }}/etcd-{{ etcd_ver }}-linux-amd64.tar.gz"
+    dest: "/tmp/"
+    remote_src: yes
+
+- name: find etcd bins
+  find:
+    paths: "/tmp/etcd-{{ etcd_ver }}-linux-amd64"
+    recurse: yes
+    patterns: "etcd*"
+  register: etcd_bins
+
+- name: copy etcd bins to /usr/local/bin/
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ etcd_bin_dir }}"
+    remote_src: true
+    mode: 0744
+  with_items: "{{ etcd_bins.files }}"

@@ -1,0 +1,46 @@
+- name: set cluster admin_2
+  shell:
+#    chdir: "{{ kubeconfig_temp_dir }}"
+    cmd: |
+      kubectl config set-cluster {{ cluster }} \
+          --certificate-authority={{ item.cert_dir }}/ca.crt \
+          --embed-certs={{ item.embed_certs }} \
+          --server=https://192.168.56.30:6443
+  register: output
+
+- debug:
+    msg: "{{ output.stdout_lines }}"
+
+- name: set credentials admin_2
+  shell:
+#    chdir: "{{ kubeconfig_temp_dir }}"
+    cmd: |
+      kubectl config set-credentials admin \
+          --client-certificate={{ item.cert_dir }}/{{ item.service }}.crt \
+          --client-key={{ item.cert_dir }}/{{ item.service }}.key
+  register: output
+
+- debug:
+    msg: "{{ output.stdout_lines }}"
+
+- name: set context admin_2
+  shell:
+#    chdir: "{{ kubeconfig_temp_dir }}"
+    cmd: |
+      kubectl config set-context {{ cluster }} \
+          --cluster={{ cluster }} \
+          --user=admin
+  register: output
+
+- debug:
+    msg: "{{ output.stdout_lines }}"
+
+- name: use context admin_2
+  shell:
+#    chdir: "{{ kubeconfig_temp_dir }}"
+    cmd: |
+      kubectl config use-context {{ cluster }}
+  register: output
+
+- debug:
+    msg: "{{ output.stdout_lines }}"

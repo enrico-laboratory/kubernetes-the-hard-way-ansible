@@ -1,0 +1,5 @@
+- name: create link for ca cert
+  file:
+    src: "{{ kube_pki_dir }}/{{ ca_crt }}.crt"
+    dest: "{{ etcd_etc_dir }}/{{ ca_crt }}.crt"
+    state: link

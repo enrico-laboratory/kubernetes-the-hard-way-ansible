@@ -1,0 +1,7 @@
+- name: copy /etc/host file
+  template:
+    src: "hosts"
+    dest: "/etc/hosts"
+    owner: root
+    mode: 0644
+    group: root

@@ -1,0 +1,6 @@
+- name: add sysctl entry
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true

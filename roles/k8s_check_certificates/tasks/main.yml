@@ -1,0 +1,6 @@
+- name: copy cert verify
+  copy:
+    src: "cert_verify.sh"
+    dest: "{{ cert_dir }}/"
+    mode: 0700
+    owner: "{{ user }}"

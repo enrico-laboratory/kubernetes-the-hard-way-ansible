@@ -1,0 +1,27 @@
+---
+- name: basic setting
+  import_playbook: k8s_basic.yml
+
+- name: setup admin
+  import_playbook: k8s_setup_admin.yml
+
+- name: Install etcd
+  import_playbook: k8s_etcd.yml
+
+- name: Install control plane
+  import_playbook: k8s_control_plane.yml
+
+- name: Bootstrap loadbalancer
+  import_playbook: k8s_bootstrap_lb.yml
+
+- name: Bootstrap workers
+  import_playbook: k8s_bootstrap_workers.yml
+
+- name: Bootstrap worker 1
+  import_playbook: k8s_bootstrap_worker1.yml
+
+- name: Bootstrap worker 2
+  import_playbook: k8s_bootstrap_worker2.yml
+
+- name: config file, networking, rbac, dns
+  import_playbook: k8s_last_touch.yml

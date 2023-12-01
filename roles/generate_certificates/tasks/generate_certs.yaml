@@ -1,0 +1,36 @@
+- name: Generate private key for {{ item.name }}
+  community.crypto.openssl_privatekey:
+    size: 2048
+    path: "{{ certs_temp_dir }}/{{ item.name }}.key"
+  register: privatekey
+
+- name: Generate a signing request for {{ item.name }}
+  community.crypto.openssl_csr:
+    path: "{{ certs_temp_dir }}/{{ item.name }}.csr"
+    privatekey_path: "{{ privatekey.filename }}"
+    subject: "{{ item.csr_subject }}"
+    subjectAltName: "{{ item.alt_names }}"
+    basic_constraints_critical: "{{ item.basic_constraints_critical }}"
+    extended_key_usage_critical: "{{ item.extended_key_usage_critical }}"
+    basic_constraints: "{{ item.basic_constraints }}"
+    key_usage: "{{ item.key_usage }}"
+    extended_key_usage: "{{ item.extended_key_usage }}"
+  register: signing_request
+
+- name: Generate a Self Signed OpenSSL certificate for {{ item.name }}
+  community.crypto.x509_certificate:
+    path: "{{ certs_temp_dir }}/{{ item.name }}.crt"
+    privatekey_path: "{{ privatekey.filename }}"
+    csr_path: "{{ signing_request.filename }}"
+    ownca_not_after: 1000d
+    provider: selfsigned
+  when: item.name == "ca"
+
+- name: Generate an OpenSSL certificate signed with your own CA certificate
+  community.crypto.x509_certificate:
+    path: "{{ certs_temp_dir }}/{{ item.name }}.crt"
+    csr_path: "{{ signing_request.filename }}"
+    ownca_path: "{{ certs_temp_dir }}/ca.crt"
+    ownca_privatekey_path: "{{ certs_temp_dir }}/ca.key"
+    provider: ownca
+  when: item.name != "ca"

@@ -1,0 +1,249 @@
+### HOST VARS ###
+k8s_master1:
+  hostname: "k8s-master1"
+  ip: "192.168.56.11"
+k8s_master2:
+  hostname: "k8s-master2"
+  ip: "192.168.56.12"
+k8s_lb:
+  ip: "192.168.56.30"
+  hostname: "k8s-lb"
+k8s_worker1:
+  ip: "192.168.56.21"
+  hostname: "k8s-worker1"
+k8s_worker2:
+  ip: "192.168.56.22"
+  hostname: "k8s-worker2"
+
+### VARIOUS VARS ###
+kernel_module: "br_netfilter"
+sysctl:
+  iptables:
+    name: "net.bridge.bridge-nf-call-iptables"
+    value: "1"
+  ip_forward:
+    name: "net.ipv4.ip_forward"
+    value: "1"
+pub_key_file: "k8s_id_rsa.pub"
+prv_key_file: "k8s_id_rsa"
+haproxy:
+  config_filename: "haproxy.cfg"
+  config_file_path: "/etc/haproxy"
+containerd:
+  version: "1.6.12"
+  config_dir: "/etc/containerd"
+cni:
+  version: "0.8.6"
+  bin_dir: "/opt/cni/bin"
+runc:
+  version: "1.1.1"
+
+bin_dir: "/usr/local/bin"
+
+### KUBERNETES VARS ###
+kubernetes_apt_repo:
+  keyring: "kubernetes-apt-keyring"
+  release: "v1.28"
+kube:
+  version: "v1.28.3"
+  release_base_url: "https://storage.googleapis.com/kubernetes-release/release"
+  release_arch: "bin/linux/amd64"
+  pki_dir: "/var/lib/kubernetes/pki"
+  lib_dir: "/var/lib/kubernetes"
+  encryption_config_file: "encryption-config.yaml"
+  services:
+    kube_apiserver:
+      name: "kube-apiserver"
+      port: "6443"
+    kube_controller_manager:
+      name: "kube-controller-manager"
+    kube_scheduler:
+      name: "kube-scheduler"
+    kubectl:
+      name: "kubectl"
+    kubelet:
+      name: "kubelet"
+      config_file: "kubelet-config.yaml"
+      config_folder: "/var/lib/kubelet"
+    kube_proxy:
+      name: "kube-proxy"
+      config_file: "kube-proxy-config.yaml"
+      config_folder: "/var/lib/kube-proxy"
+  pod_cidr: "10.244.0.0/16"
+  service_cidr: "10.96.0.0/16"
+  cluster_dns: "10.96.0.10"
+  bootstrap_token_name: "bootstrap-token-07401b"
+
+### ETCD VARS ###
+etcd:
+  name: "etcd"
+  data_dir: "/var/lib/etcd"
+  etc_dir: '/etc/etcd'
+  version: "v3.5.3"
+  cert_filename_root: "etcd-server"
+systemd_unit_directory: "/etc/systemd/system"
+
+### CERTIFICATES ###
+certificates:
+  temp_dir: "/root/certs"
+  ca:
+    "name": "ca"
+    "csr_subject": { "CN": "KUBERNETES-CA", "O": "Kubernetes" }
+    "basic_constraints_critical": false
+    "extended_key_usage_critical": false
+    "alt_names": [ ]
+    "basic_constraints": ["CA:TRUE"]
+    "key_usage": [ ]
+    "extended_key_usage": [ ]
+  admin:
+    "name": "admin"
+    "csr_subject": { "CN": "admin", "O": "system:masters" }
+    "basic_constraints_critical": false
+    "extended_key_usage_critical": false
+    "alt_names": [ ]
+    "basic_constraints": [ "CA:TRUE" ]
+    "key_usage": [ ]
+    "extended_key_usage": [ ]
+  kube_controller_manager:
+    "name": "kube-controller-manager"
+    "csr_subject": { "CN": "system:kube-controller-manager", "O": "system:kube-controller-manager" }
+    "basic_constraints_critical": false
+    "extended_key_usage_critical": false
+    "alt_names": [ ]
+    "basic_constraints": [ ]
+    "key_usage": [ ]
+    "extended_key_usage": [ ]
+  kube_proxy:
+    "name": "kube-proxy"
+    "csr_subject": { "CN": "system:kube-proxy", "O": "system:node-proxier" }
+    "basic_constraints_critical": false
+    "extended_key_usage_critical": false
+    "alt_names": [ ]
+    "basic_constraints": [ ]
+    "key_usage": [ ]
+    "extended_key_usage": [ ]
+  kube_scheduler:
+    "name": "kube-scheduler"
+    "csr_subject": { "CN": "system:kube-scheduler", "O": "system:kube-scheduler" }
+    "basic_constraints_critical": false
+    "extended_key_usage_critical": false
+    "alt_names": [ ]
+    "basic_constraints": [ ]
+    "key_usage": [ ]
+    "extended_key_usage": [ ]
+  kube_apiserver:
+    "name": "kube-apiserver"
+    "csr_subject": { "CN": "kube-apiserver", "O": "Kubernetes" }
+    "basic_constraints_critical": true
+    "extended_key_usage_critical": true
+    "alt_names": [
+      "DNS:kubernetes",
+      "DNS:kubernetes.default",
+      "DNS:kubernetes.default.svc",
+      "DNS:kubernetes.default.svc.cluster",
+      "DNS:kubernetes.default.svc.cluster.local",
+      "IP:10.96.0.1",
+      "IP:192.168.56.11",
+      "IP:192.168.56.12",
+      "IP:192.168.56.30",
+      "IP:127.0.0.1"
+    ]
+    "basic_constraints": [ "CA:FALSE" ]
+    "key_usage": [
+      "nonRepudiation",
+      "digitalSignature",
+      "keyEncipherment"
+    ]
+    "extended_key_usage": [ "serverAuth" ]
+  apiserver_kubelet_client:
+    "name": "apiserver-kubelet-client"
+    "csr_subject": { "CN": "kube-apiserver-kubelet-client", "O": "system:masters" }
+    "basic_constraints_critical": true
+    "extended_key_usage_critical": true
+    "alt_names": [ ]
+    "basic_constraints": [ "CA:FALSE" ]
+    "key_usage": [
+      "nonRepudiation",
+      "digitalSignature",
+      "keyEncipherment"
+    ]
+    "extended_key_usage": [ "clientAuth" ]
+  etcd_server:
+    "name": "etcd-server"
+    "csr_subject": { "CN": "etcd-server", "O": "Kubernetes" }
+    "basic_constraints_critical": false
+    "extended_key_usage_critical": false
+    "alt_names": [
+      "DNS:k8s-master1",
+      "DNS:k8s-master2",
+      "IP:192.168.56.11",
+      "IP:192.168.56.12",
+      "IP:127.0.0.1"
+    ]
+    "basic_constraints": [ "CA:FALSE" ]
+    "key_usage": [
+      "nonRepudiation",
+      "digitalSignature",
+      "keyEncipherment"
+    ]
+    "extended_key_usage": [ ]
+  service_account:
+    "name": "service-account"
+    "csr_subject": { "CN": "service-accounts", "O": "Kubernetes" }
+    "basic_constraints_critical": false
+    "extended_key_usage_critical": false
+    "alt_names": [ ]
+    "basic_constraints": [ ]
+    "key_usage": [ ]
+    "extended_key_usage": [ ]
+  worker1:
+    "name": "k8s-worker1"
+    "csr_subject": { "CN": "system:node:k8s-worker1", "O": "system:nodes" }
+    "basic_constraints_critical": false
+    "extended_key_usage_critical": false
+    "alt_names": [
+      "DNS:{{ k8s_worker1.hostname }}",
+      "IP:{{ k8s_worker1.ip }}"
+    ]
+    "basic_constraints": [ "CA:FALSE" ]
+    "key_usage": [
+      "nonRepudiation",
+      "digitalSignature",
+      "keyEncipherment"
+    ]
+    "extended_key_usage": [ ]
+
+### KUBE CONFIG VARS##
+encryption_key: "7DsP0SuJXgZxGUgSl/u4qDfrpRhHzUN2xDtuUkVSIE8="
+cluster_name: "homelab"
+kubeconfig:
+  kube_proxy:
+    "service": "kube-proxy"
+    "embed_certs": "false"
+    "user": "{{ certificates.kube_proxy.csr_subject.CN }}"
+    "cert_dir": "{{ kube.pki_dir }}"
+  kube_controller_manager:
+    "service": "kube-controller-manager"
+    "embed_certs": "false"
+    "user": "{{ certificates.kube_controller_manager.csr_subject.CN }}"
+    "cert_dir": "{{ kube.pki_dir }}"
+  kube_scheduler:
+    "service": "kube-scheduler"
+    "embed_certs": "false"
+    "user": "{{ certificates.kube_scheduler.csr_subject.CN }}"
+    "cert_dir": "{{ kube.pki_dir }}"
+  admin:
+    "service": "admin"
+    "embed_certs": "true"
+    "user": "{{ certificates.admin.csr_subject.CN }}"
+    "cert_dir": "{{ certificates.temp_dir }}"
+  worker1:
+    "service": "k8s-worker1"
+    "embed_certs": "false"
+    "user": "{{ certificates.worker1.csr_subject.CN }}"
+    "cert_dir": "{{ kube.pki_dir }}"
+  admin_2:
+    "service": "admin"
+    "embed_certs": "true"
+    "user": "{{ certificates.admin.csr_subject.CN }}"
+    "cert_dir": "{{ certificates.temp_dir }}"

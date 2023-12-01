@@ -1,0 +1,8 @@
+- name: bootstrap workers
+  become: yes
+  hosts: k8s-worker
+  roles:
+    - role: k8s_install_cri
+      kubernetes_apt_repo_keyring: "{{ kubernetes_apt_repo.keyring }}"
+      kube_version_apt_repo: "{{ kubernetes_apt_repo.release }}"
+      containerd_config_dir: "{{ containerd.config_dir }}"

@@ -1,0 +1,19 @@
+---
+- name: restart kube_apiserver service
+  service:
+    name: "{{ kube_apiserver }}"
+    state: restarted
+    daemon_reload: true
+
+- name: restart kube_controller_manager service
+  service:
+    name: "{{ kube_controller_manager }}"
+    state: restarted
+    daemon_reload: true
+
+- name: restart kube_scheduler service
+  service:
+    name: "{{ kube_scheduler }}"
+    state: restarted
+    daemon_reload: true
+

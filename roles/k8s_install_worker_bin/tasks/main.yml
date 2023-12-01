@@ -1,0 +1,32 @@
+- name: create directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ kubelet_dir }}"
+    - "{{ kube_proxy_dir }}"
+
+- name: download binaries
+  get_url:
+    url: "https://storage.googleapis.com/kubernetes-release/release/{{ kube_version }}/bin/linux/amd64/{{ item }}"
+    dest: "{{ bin_directory }}"
+    mode: 0744
+  loop:
+    - "{{ kube_proxy_name }}"
+    - "{{ kubelet_name }}"
+    - "{{ kubectl_name }}"
+
+- name: "{{ item.name }} config files"
+  template:
+    src: "{{ item.config_file }}"
+    dest: "{{ item.config_folder }}"
+  notify: restart {{ item.name }}
+  loop:
+    - "{{ kubelet_service }}"
+    - "{{ kube_proxy_service }}"
+
+- name: services
+  include_tasks: services.yml
+  loop:
+    - "{{ kube_proxy_name }}"
+    - "{{ kubelet_name }}"

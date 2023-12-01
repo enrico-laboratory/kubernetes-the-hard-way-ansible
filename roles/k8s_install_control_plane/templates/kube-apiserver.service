@@ -1,0 +1,41 @@
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+ExecStart={{ kube_bin_dir }}/{{ kube_apiserver }} \
+  --advertise-address={{ ansible_default_ipv4.address }} \
+  --allow-privileged=true \
+  --apiserver-count=2 \
+  --audit-log-maxage=30 \
+  --audit-log-maxbackup=3 \
+  --audit-log-maxsize=100 \
+  --audit-log-path=/var/log/audit.log \
+  --authorization-mode=Node,RBAC \
+  --bind-address=0.0.0.0 \
+  --client-ca-file={{ kube_pki_dir }}/{{ ca_crt }} \
+  --enable-admission-plugins=NodeRestriction,ServiceAccount \
+  --enable-bootstrap-token-auth=true \
+  --etcd-cafile={{ kube_pki_dir }}/{{ ca_crt }} \
+  --etcd-certfile={{ kube_pki_dir }}/{{ etcd_cert }} \
+  --etcd-keyfile={{ kube_pki_dir }}/{{ etcd_key }} \
+  --etcd-servers=https://{{ k8s_master1_hostname }}:2379,https://{{ k8s_master2_hostname }}:2379 \
+  --event-ttl=1h \
+  --encryption-provider-config={{ kube_lib_dir }}/{{ encryption_config_file }} \
+  --kubelet-certificate-authority={{ kube_pki_dir }}/{{ ca_crt }} \
+  --kubelet-client-certificate={{ kube_pki_dir }}/{{ apiserver_client_crt }} \
+  --kubelet-client-key={{ kube_pki_dir }}/{{ apiserver_client_key }} \
+  --runtime-config=api/all=true \
+  --service-account-key-file={{ kube_pki_dir }}/{{ service_account_crt }}\
+  --service-account-signing-key-file={{ kube_pki_dir }}/{{ service_account_key }} \
+  --service-account-issuer=https://{{ k8s_lb_ip }}:6443 \
+  --service-cluster-ip-range={{ service_cidr }} \
+  --service-node-port-range=30000-32767 \
+  --tls-cert-file={{ kube_pki_dir }}/{{ kube_apiserver }}.crt \
+  --tls-private-key-file={{ kube_pki_dir }}/{{ kube_apiserver }}.key \
+  --v=2
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

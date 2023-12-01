@@ -1,0 +1,20 @@
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart={{ etcd_bin_dir }}/{{ service }} \
+  --name {{ inventory_hostname }} \
+  --initial-advertise-peer-urls http://{{ ansible_default_ipv4.address }}:2380 \
+  --listen-peer-urls http://{{ ansible_default_ipv4.address }}:2380 \
+  --listen-client-urls http://{{ ansible_default_ipv4.address }}:2379,http://127.0.0.1:2379 \
+  --advertise-client-urls http://{{ ansible_default_ipv4.address }}:2379 \
+  --initial-cluster-token etcd-cluster-0 \
+  --initial-cluster {{ k8s_master1.hostname }}=http://{{ k8s_master1.ip }}:2380,{{ k8s_master2.hostname }}=http://{{ k8s_master2.ip }}:2380 \
+  --initial-cluster-state new \
+  --data-dir={{ etcd_data_dir }}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

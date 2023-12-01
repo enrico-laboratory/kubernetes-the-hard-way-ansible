@@ -1,0 +1,14 @@
+- name: copy {{ item }} service file
+  template:
+    src: "{{ item }}.service"
+    dest: "{{ systemd_unit_dir }}"
+    mode: 0644
+    owner: root
+  notify: restart {{ item }}
+
+- name: start {{ item }} service
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+

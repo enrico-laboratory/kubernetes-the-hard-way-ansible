@@ -1,0 +1,6 @@
+127.0.0.1 localhost
+{{ k8s_master1.ip }} {{ k8s_master1.hostname }}
+{{ k8s_master2.ip }} {{ k8s_master2.hostname }}
+{{ k8s_lb.ip }} {{ k8s_lb.hostname }}
+{{ k8s_worker1.ip }} {{ k8s_worker1.hostname }}
+{{ k8s_worker2.ip }} {{ k8s_worker2.hostname }}

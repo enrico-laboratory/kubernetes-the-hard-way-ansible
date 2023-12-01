@@ -1,0 +1,28 @@
+- name: create .ssh directory
+  file:
+    path:  "{{ user_dir }}/.ssh"
+    state: directory
+    owner: "{{ user }}"
+    mode: 0700
+
+- name: copy keys
+  block:
+  - name: copy private key
+    copy:
+      src: "{{ private_key_file }}"
+      dest: "{{ user_dir }}/.ssh/id_rsa"
+      mode: 0600
+      owner: "{{ user }}"
+  - name: copy public key
+    copy:
+      src: "{{ public_key_file }}"
+      dest: "{{ user_dir }}/.ssh/id_rsa.pub"
+      mode: 0600
+      owner: "{{ user }}"
+  when: inventory_hostname == private_key_hostname
+
+- name: Set authorized key
+  ansible.posix.authorized_key:
+    user: "{{ user }}"
+    state: present
+    key: "{{ lookup('file', public_key_file) }}"

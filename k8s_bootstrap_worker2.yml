@@ -1,0 +1,28 @@
+- name: bootstrap worker 2 preparation
+  become: yes
+  hosts: k8s-master1
+  roles:
+    - role: k8s_bootstrap_workers_prep
+      kube_lib_dir: "{{ kube.lib_dir }}"
+      kubeconfig_admin_service: "{{ kubeconfig.admin.service }}"
+      kube_bootstrap_token_name: "{{ kube.bootstrap_token_name }}"
+
+- name: bootstrap worker 2
+  become: yes
+  hosts: k8s-worker2
+  roles:
+    - role: k8s_install_worker2_bin
+      kubelet_dir: "{{kube.services.kubelet.config_folder }}"
+      kube_proxy_dir: "{{ kube.services.kube_proxy.config_folder }}"
+      kube_proxy_name: "{{ kube.services.kube_proxy.name }}"
+      kubectl_name: "{{ kube.services.kubectl.name }}"
+      kubelet_name: "{{ kube.services.kubelet.name }}"
+      kube_version: "{{ kube.version }}"
+      bin_directory: "{{ bin_dir }}"
+      kube_pki_dir: "{{ kube.pki_dir }}"
+      kube_lib_dir: "{{ kube.lib_dir }}"
+      k8s_lb_ip: "{{ k8s_lb.ip }}"
+      kube_cluster_dns: "{{ kube.cluster_dns }}"
+      pod_cidr: "{{ kube.pod_cidr }}"
+      systemd_unit_dir: "{{ systemd_unit_directory }}"
+      kubelet_config_file: "{{ kube.services.kubelet.config_file }}"

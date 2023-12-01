@@ -1,0 +1,20 @@
+- name: k8s
+  become: yes
+  hosts: k8s
+  roles:
+    - role: update_hosts
+    - role: k8s_hosts
+    - role: remove_ssh_root_password_access
+    - role: add_kernel_module
+      modules:
+      - "{{ kernel_module }}"
+    - role: add_sysctl_entry
+      sysctl_entry:
+        - "{{ sysctl.iptables }}"
+        - "{{ sysctl.ip_forward }}"
+    - role: set_credentials_remote
+      user: "root"
+      user_dir: "/root"
+      private_key_hostname: "{{ k8s_master1.hostname }}"
+      public_key_file: "{{ pub_key_file }}"
+      private_key_file: "{{ prv_key_file }}"

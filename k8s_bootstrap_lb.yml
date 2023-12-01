@@ -1,0 +1,10 @@
+- name: Bootstrap loadbalancer
+  become: yes
+  hosts: k8s-lb
+  roles:
+    - role: k8s_install_haproxy
+      config_filename: "{{ haproxy.config_filename }}"
+      config_file_path: "{{ haproxy.config_file_path }}"
+      k8s_lb_ip: "{{ k8s_lb.ip }}"
+      k8s_master1_ip: "{{ k8s_master1.ip }}"
+      k8s_master2_ip: "{{ k8s_master2.ip }}"

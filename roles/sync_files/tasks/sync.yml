@@ -1,0 +1,14 @@
+- name: fetch file "{{ sync_files.filename }}"
+  fetch:
+    dest: "special/"
+    src: "{{ sync_files.source_path }}/{{ sync_files.filename }}"
+    flat: yes
+  when: inventory_hostname == sync_files.src_hostname
+
+- name: push file "{{ sync_files.filename }}"
+  copy:
+    dest: "{{ sync_files.dest_path }}/{{ sync_files.filename }}"
+    src: "special/{{ sync_files.filename }}"
+    mode: "{{ sync_files.mode }}"
+    owner: "{{ sync_files.owner }}"
+  when: inventory_hostname == item

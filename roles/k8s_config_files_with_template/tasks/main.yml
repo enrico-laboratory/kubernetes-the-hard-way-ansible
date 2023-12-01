@@ -1,0 +1,52 @@
+- name: create konfig directory
+  file:
+    path: "{{ kube_lib_dir }}"
+    state: directory
+    owner: root
+    group: root
+
+- name: copy kube-proxy config file
+  template:
+    src: "{{ kube_proxy_service }}.kubeconfig"
+    dest: "{{ kube_proxy_dir }}"
+    owner: root
+    mode: 0600
+  when: inventory_hostname in {{ worker_list }}
+
+- name: copy kube-controller-manager config file
+  template:
+    src: "{{ kube_controller_manager_service }}.kubeconfig"
+    dest: "{{ kube_lib_dir }}"
+    owner: root
+    mode: 0600
+  when: inventory_hostname in {{ master_list }}
+
+- name: copy kube-scheduler config file
+  template:
+    src: "{{ kube_scheduler_service }}.kubeconfig"
+    dest: "{{ kube_lib_dir }}"
+    owner: root
+    mode: 0600
+  when: inventory_hostname in {{ master_list }}
+
+- name: copy admin config file
+  template:
+    src: "{{ admin_service }}.kubeconfig"
+    dest: "{{ kube_lib_dir }}"
+    owner: root
+    mode: 0600
+  when: inventory_hostname in {{ master_list }}
+
+- name: make dir {{ kubelet_dir }}
+  file:
+    path: "{{ kubelet_dir }}"
+    state: directory
+  when: inventory_hostname == k8s_worker_hostname
+
+- name: copy worker1 config file
+  template:
+    src: "{{ worker1_service }}.kubeconfig"
+    dest: "{{ kubelet_dir }}/{{ kubelet_service }}.kubeconfig"
+    owner: root
+    mode: 0600
+  when: inventory_hostname == k8s_worker_hostname

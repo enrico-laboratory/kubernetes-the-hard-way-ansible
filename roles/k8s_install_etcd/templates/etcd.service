@@ -1,0 +1,28 @@
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart={{ etcd_bin_dir }}/{{ service }} \
+  --name {{ inventory_hostname }} \
+  --cert-file={{ etcd_etc_dir }}/{{ etcd_cert_key_filename }}.crt \
+  --key-file={{ etcd_etc_dir }}/{{ etcd_cert_key_filename }}.key \
+  --peer-cert-file={{ etcd_etc_dir }}/{{ etcd_cert_key_filename }}.crt \
+  --peer-key-file={{ etcd_etc_dir }}/{{ etcd_cert_key_filename }}.key \
+  --trusted-ca-file={{ etcd_etc_dir }}/ca.crt \
+  --peer-trusted-ca-file={{ etcd_etc_dir }}/ca.crt \
+  --peer-client-cert-auth \
+  --client-cert-auth \
+  --initial-advertise-peer-urls https://{{ ansible_default_ipv4.address }}:2380 \
+  --listen-peer-urls https://{{ ansible_default_ipv4.address }}:2380 \
+  --listen-client-urls https://{{ ansible_default_ipv4.address }}:2379,https://127.0.0.1:2379 \
+  --advertise-client-urls https://{{ ansible_default_ipv4.address }}:2379 \
+  --initial-cluster-token etcd-cluster-0 \
+  --initial-cluster {{ k8s_master1.hostname }}=https://{{ k8s_master1.ip }}:2380,{{ k8s_master2.hostname }}=https://{{ k8s_master2.ip }}:2380 \
+  --initial-cluster-state new \
+  --data-dir={{ etcd_data_dir }}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

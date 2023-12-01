@@ -1,0 +1,16 @@
+- name: create temp directory
+  file:
+    path: "{{ kubeconfig_temp_dir }}"
+    state: directory
+    owner: root
+    group: root
+
+- name: generate config files
+  include_tasks: generate_config.yml
+  loop: "{{ config }}"
+
+- name: generate encryption file
+  template:
+    src: "{{ kube_encryption_config_file }}"
+    dest: "{{ kubeconfig_temp_dir }}/{{ kube_encryption_config_file }}"
+    mode: 0644
