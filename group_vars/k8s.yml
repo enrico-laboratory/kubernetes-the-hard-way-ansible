@@ -143,9 +143,9 @@ certificates:
       "DNS:kubernetes.default.svc.cluster",
       "DNS:kubernetes.default.svc.cluster.local",
       "IP:10.96.0.1",
-      "IP:192.168.56.11",
-      "IP:192.168.56.12",
-      "IP:192.168.56.30",
+      "IP:{{ k8s_master1.ip }}",
+      "IP:{{ k8s_master2.ip }}",
+      "IP:{{ k8s_lb.ip }}",
       "IP:127.0.0.1"
     ]
     "basic_constraints": [ "CA:FALSE" ]
@@ -174,10 +174,10 @@ certificates:
     "basic_constraints_critical": false
     "extended_key_usage_critical": false
     "alt_names": [
-      "DNS:k8s-master1",
-      "DNS:k8s-master2",
-      "IP:192.168.56.11",
-      "IP:192.168.56.12",
+      "DNS:{{ k8s_master1.hostname }}",
+      "DNS:{{ k8s_master2.hostname }}",
+      "IP:{{ k8s_master1.ip }}",
+      "IP:{{ k8s_master2.ip }}",
       "IP:127.0.0.1"
     ]
     "basic_constraints": [ "CA:FALSE" ]

@@ -23,7 +23,7 @@ The `k8s_main.yml` playbook is a collection of playbooks. A partial playbook can
 ansible-playbook -i inventory/inventory.yaml k8s_basic.yml
 ```
 
-The hosts IPs or the host names might be changed in the [`group_vars/k8s`](./group_vars/k8s.yml) file. Different IPs or host names have not been tested.
+The hosts IPs might be changed in the [`group_vars/k8s`](./group_vars/k8s.yml) file. However, different IPs have not been tested. The host name cannot be changed, the roles would need to be modified to work correctly
 
 ## Future steps
 

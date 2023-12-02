@@ -6,6 +6,7 @@
       kubeconfig_temp_dir: "{{ kubeconfig.temp_dir }}"
       cluster: "{{ cluster_name }}"
       kubeconfig_admin_2: "{{ kubeconfig.admin_2 }}"
+      k8s_lb_ip: "{{ k8s_lb.ip }}"
     - role: k8s_install_networking
     - role: k8s_rbac
       kube_lib_dir: "{{ kube.lib_dir }}"
